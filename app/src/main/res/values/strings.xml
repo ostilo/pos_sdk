@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">KpayTerminalDemoSdk</string>
+    <string name="print_receipt">Print Receipt</string>
+    <string name="test_kpay_transaction">Test Kpay Transaction</string>
+</resources>
