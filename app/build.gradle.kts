@@ -52,8 +52,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-//    implementation(files("libs/pos_utils-debug.aar"))
-    implementation(files("libs/pos_utils-test.aar"))
+    implementation(files("libs/pos_utils-release.aar"))
     implementation(files("libs/AFSDKInterface_202502211810_V0.0.236_236.aar"))
 
 
