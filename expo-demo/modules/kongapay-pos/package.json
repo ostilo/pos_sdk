@@ -1,0 +1,18 @@
+{
+  "name": "kongapay-pos",
+  "version": "1.0.0",
+  "description": "Expo native module bridge for KongaPay POS SDK (Android Anfu/Trendit)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {},
+  "keywords": ["expo", "kongapay", "pos", "react-native"],
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "expo-modules-core": "*"
+  }
+}

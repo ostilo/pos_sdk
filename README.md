@@ -427,6 +427,23 @@ parse "data" → KongaTransactionResponse
 
 ---
 
+## React Native / Expo
+
+Partners building with **Expo / React Native** can integrate the same Android AARs via a custom **Expo Dev Client** (not Expo Go).
+
+A working demo lives in [`expo-demo/`](./expo-demo):
+
+```bash
+cd expo-demo
+npm install
+npx expo prebuild --platform android
+npx expo run:android
+```
+
+See [`expo-demo/README.md`](./expo-demo/README.md) for the JS API, constraints (Android Anfu/Trendit only, `minSdk` 29, `ApplicationClass`), and EAS notes.
+
+---
+
 ## Go-live checklist
 
 - [ ] Correct AAR for your environment (keys are baked in by KongaPay)

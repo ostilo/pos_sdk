@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "KongaPay POS Expo Demo",
+    "slug": "kongapay-pos-expo-demo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "kongapaypos",
+    "plugins": [
+      "expo-dev-client",
+      "./modules/kongapay-pos/app.plugin.js",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 29
+          }
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kongapay.pos.expodemo"
+    },
+    "android": {
+      "package": "com.kongapay.pos.expodemo",
+      "minSdkVersion": 29,
+      "adaptiveIcon": {
+        "backgroundColor": "#0F766E",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

@@ -1,0 +1,71 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+group = 'expo.modules.kongapaypos'
+version = '1.0.0'
+
+def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
+if (expoModulesCorePlugin.exists()) {
+  apply from: expoModulesCorePlugin
+  applyKotlinExpoModulesCorePlugin()
+  safeExtGet = { prop, fallback ->
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+  }
+} else {
+  safeExtGet = { prop, fallback ->
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+  }
+}
+
+android {
+  namespace "expo.modules.kongapaypos"
+  compileSdkVersion safeExtGet("compileSdkVersion", 34)
+
+  defaultConfig {
+    minSdkVersion safeExtGet("minSdkVersion", 29)
+    targetSdkVersion safeExtGet("targetSdkVersion", 34)
+    versionCode 1
+    versionName "1.0.0"
+  }
+
+  lintOptions {
+    abortOnError false
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = "17"
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+  maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+  implementation project(':expo-modules-core')
+
+  implementation files('libs/pos_utils-release.aar')
+  implementation files('libs/AFSDKInterface_202502211810_V0.0.236_236.aar')
+
+  implementation 'com.google.code.gson:gson:2.9.0'
+  implementation 'com.airbnb.android:lottie:6.0.0'
+  implementation 'com.github.getActivity:TitleBar:9.2'
+  implementation 'com.github.getActivity:ToastUtils:9.5'
+
+  implementation('com.squareup.retrofit2:retrofit:2.4.0') {
+    exclude group: 'com.squareup.okhttp3'
+  }
+  implementation('com.squareup.retrofit2:converter-gson:2.4.0') {
+    exclude group: 'com.squareup.okhttp3'
+  }
+  implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+  implementation 'com.squareup.okhttp3:logging-interceptor:3.14.9'
+  implementation 'com.squareup.retrofit2:converter-scalars:2.0.0'
+}
