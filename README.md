@@ -377,12 +377,152 @@ fun handlePaymentResult(resultCode: Int, data: android.content.Intent?) {
 
 ---
 
-## Printing (optional)
+## Printing (Anfu)
+
+Printing is supported on **Anfu** terminals today. Trendit printing is not implemented yet.
+
+You need an `Activity` context (not only `Application`), because the Anfu printer binds to the device printer service from an Activity.
+
+### 1. Print a transaction receipt
+
+Use this after a successful (or declined) card payment when you already have a `KongaTransactionResponse`:
 
 ```kotlin
-val device = KongaPos.createDevice(context) { /* unused for print-only */ }
-device.printTransaction(kongaTransactionResponse, logoBitmapOrNull)
+import android.graphics.BitmapFactory
+import com.konga.pos_utils.sdk.KongaPos
+import com.konga.pos_utils.sdk.POSDeviceImpl
+import com.konga.pos_utils.sdk.PosType
+
+// Option A — via KongaPos helper (requires merchant already set)
+val device = KongaPos.createDevice(this) { /* unused for print-only */ }
+device.printTransaction(response, logoBitmapOrNull)
+
+// Option B — direct (no merchant required for print-only)
+val posImpl = POSDeviceImpl(
+    context = this,                 // must be an Activity
+    posType = PosType.ANFU,
+    transactionInfo = null
+) { /* unused for print-only */ }
+
+val logo = BitmapFactory.decodeResource(resources, R.drawable.your_logo) // optional
+posImpl.printTransaction(response, logo)
 ```
+
+`printTransaction` builds a standard slip from the response (amount, STAN, card, TID, status, etc.) and prints it on the Anfu thermal printer.
+
+### 2. Custom printing (supported)
+
+Custom layouts are supported on Anfu via `POSPrintItem` + `printCustomData`.
+
+Build a list of print rows, then print:
+
+```kotlin
+import com.konga.pos_utils.sdk.POSDeviceImpl
+import com.konga.pos_utils.sdk.POSPrintItem
+import com.konga.pos_utils.sdk.PosType
+
+val items = listOf(
+    POSPrintItem.DashSeparator,
+    POSPrintItem.Header(
+        address = "My Merchant Store",
+        startPadding = 4
+    ),
+    POSPrintItem.Header(
+        address = "Lagos, Nigeria",
+        startPadding = 5
+    ),
+    POSPrintItem.DashSeparator,
+    POSPrintItem.BodyItem(
+        title = "Order",
+        tabSeparator = 2,
+        value = "ORD-1234"
+    ),
+    POSPrintItem.BodyItem(
+        title = "Amount",
+        tabSeparator = 2,
+        value = "NGN 50.00"
+    ),
+    POSPrintItem.BodyItem(
+        title = "Status",
+        tabSeparator = 2,
+        value = "APPROVED"
+    ),
+    POSPrintItem.NewLineSeparator(no = 1),
+    POSPrintItem.Header(
+        address = "Thank you!",
+        startPadding = 6
+    ),
+    POSPrintItem.NewLineSeparator(no = 4)
+    // KongaFooter is auto-appended by printCustomData if missing
+)
+
+val posImpl = POSDeviceImpl(this, PosType.ANFU, null) { }
+posImpl.printCustomData(items, logoBitmapOrNull)
+```
+
+#### `POSPrintItem` types
+
+| Item | Purpose |
+|------|---------|
+| `DashSeparator` | Prints a dashed line |
+| `Header(address, startPadding)` | Centered/padded single line of text |
+| `BodyItem(title, tabSeparator, value)` | `TITLE:   value` row |
+| `NewLineSeparator(no)` | Blank lines (`no` times) |
+| `Image(bitmap)` | Image row (logo / QR-style bitmap) |
+| `KongaFooter` | "Powered by KongaPay" footer (auto-added if omitted) |
+
+#### Convert a transaction into print items
+
+If you want the default receipt layout as a starting point, then tweak it:
+
+```kotlin
+import com.konga.pos_utils.sdk.PrinterItemConverterUtil
+
+val items = PrinterItemConverterUtil
+    .transactionResponseToPrintItems(response)
+    .toMutableList()
+
+// insert/customize before printing
+items.add(
+    1,
+    POSPrintItem.Header(address = "Custom Banner", startPadding = 4)
+)
+
+posImpl.printCustomData(items, logoBitmapOrNull)
+```
+
+### 3. Advanced: `AnfuPrinter.Builder` directly
+
+For finer control (faint paper / B&W threshold), call the Anfu builder yourself:
+
+```kotlin
+import com.konga.pos_utils.sdk.pos.anfu.AnfuPrinter
+
+AnfuPrinter.Builder(this)
+    .setTransactionResponse(response)   // OR .setPrintItems(customItems)
+    .setImageBitmap(logoBitmapOrNull)
+    .setIsMerchantApp(false)
+    .setFaintPaperMode(true)            // larger text for faint thermal paper
+    .setBlackWhiteThreshold(180)        // 160 default; 180–200 darker
+    .print()
+```
+
+| Builder option | Description |
+|----------------|-------------|
+| `setTransactionResponse(...)` | Print standard slip from payment response |
+| `setPrintItems(...)` | Print your custom `POSPrintItem` list |
+| `setImageBitmap(...)` | Optional logo at top |
+| `setFaintPaperMode(true)` | Larger text for faint paper |
+| `setBlackWhiteThreshold(n)` | Gray→B&W threshold (`160` default, higher = darker) |
+| `setIsMerchantApp(false)` | Keep `false` for partner apps |
+
+### Printing notes
+
+- **Anfu only** for now (`PosType.ANFU`). Trendit print APIs are stubs.
+- Call print from an **Activity** (e.g. `this` in `AppCompatActivity`).
+- Printing is asynchronous (printer service bind + background executor).
+- Prefer keeping a logo as a small monochrome-friendly bitmap for thermal printers.
+- Demo UI has a `printReceipt` button id — wire it to `printTransaction` / `printCustomData` after a payment response is available.
 
 ---
 
